@@ -12,11 +12,11 @@ export default function Home() {
       <Navigation />
       <BackgroundLines className="flex items-center justify-center flex-col pt-24 sm:pt-24 md:pt-12 lg:pt-28 px-4 sm:px-6 md:px-12 lg:px-12 w-full max-w-7xl mx-auto">
         <h2 className="bg-clip-text text-transparent text-center bg-gradient-to-b from-neutral-900 to-neutral-700 dark:from-neutral-600 dark:to-white text-4xl sm:text-5xl lg:text-7xl mb-4 py-4 sm:py-4 md:py-10 relative z-20 font-bold tracking-tight">
-          Find Your Dream <br /> Boarding Place
+          Integrated Legal <br /> Management System
         </h2>
         <p className="text-sm md:text-lg text-textPrimary text-center mb-8">
-          Discover the perfect home away from home. Browse verified boarding
-          places near your university with ease.
+          A unified digital platform designed to manage legal cases and
+          agreement approvals efficiently, securely, and transparently.
         </p>
         <Stat />
       </BackgroundLines>

@@ -1,64 +1,64 @@
 import { cn } from "@/lib/utils";
 import {
-  Search,
+  Scale,
+  FileText,
+  BarChart2,
   ShieldCheck,
-  DollarSign,
-  Image,
-  Star,
-  Calendar,
-  MapPin,
-  Users,
+  Gavel,
+  ClipboardList,
+  Clock,
+  UserCog,
 } from "lucide-react";
 
 export const Features = () => {
   const features = [
     {
-      title: "Smart Search",
+      title: "Smart Legal Case Handling",
       description:
-        "Find your ideal boarding place with intelligent filters for location, price, and amenities.",
-      icon: <Search />,
+        "Manage legal cases from initiation to closure with structured workflows and full visibility.",
+      icon: <Scale />,
     },
     {
-      title: "Verified Listings",
+      title: "Agreement Approval",
       description:
-        "Every property is verified and approved by our team to ensure quality and safety.",
+        "Streamline agreement drafting, review, and approval within one secure system.",
+      icon: <FileText />,
+    },
+    {
+      title: "Real-Time Dashboards",
+      description:
+        "Gain instant visibility into legal operations with active case status and workload tracking.",
+      icon: <BarChart2 />,
+    },
+    {
+      title: "Secure Role-Based Access",
+      description:
+        "User & role management with controlled access to cases and complete audit history.",
       icon: <ShieldCheck />,
     },
     {
-      title: "Transparent Pricing",
+      title: "Court Date Scheduling",
       description:
-        "No hidden fees. Clear pricing information upfront so you can budget confidently.",
-      icon: <DollarSign />,
+        "Schedule court dates and hearings with automated reminders and calendar integration.",
+      icon: <Gavel />,
     },
     {
-      title: "Real Photos",
+      title: "Document Management",
       description:
-        "Browse authentic photos of properties to see exactly what you're getting.",
-      icon: <Image />,
+        "Upload, organise, and retrieve case documents securely with version control.",
+      icon: <ClipboardList />,
     },
     {
-      title: "Student Reviews",
+      title: "Expiry & Renewal Alerts",
       description:
-        "Read honest reviews from fellow students who have stayed at these places.",
-      icon: <Star />,
+        "Receive timely notifications for agreement expirations and scheduled renewals.",
+      icon: <Clock />,
     },
     {
-      title: "Easy Booking",
+      title: "Legal Officer Assignment",
       description:
-        "Simple and secure booking process with instant confirmation.",
-      icon: <Calendar />,
-    },
-    {
-      title: "Location Based",
-      description:
-        "Find boarding places near your university campus with distance information.",
-      icon: <MapPin />,
-    },
-    {
-      title: "Community Driven",
-      description:
-        "Connect with other students and landlords in our trusted community.",
-      icon: <Users />,
+        "Assign and manage legal officers per case with workload tracking and accountability.",
+      icon: <UserCog />,
     },
   ];
 
@@ -66,11 +66,11 @@ export const Features = () => {
     <div className="pt-4 px-4 sm:px-6 md:px-12 lg:px-12 w-full max-w-7xl mx-auto">
       <div className="text-center mb-16">
         <h2 className="text-4xl font-bold text-textPrimary dark:text-white mb-4">
-          Why Choose BoardWise?
+          Why Choose LegalScale?
         </h2>
         <p className="text-xl text-textSecondary max-w-2xl mx-auto">
-          Everything you need to find your perfect boarding place in one
-          platform
+          Everything you need to manage legal cases and agreements in one
+          unified platform
         </p>
       </div>
 

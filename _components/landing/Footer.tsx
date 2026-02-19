@@ -6,11 +6,11 @@ export const Footer = () => {
       <div className="">
         <div className="sm:flex sm:items-center sm:justify-between">
           <a
-            href="https://flowbite.com/"
+            href="/"
             className="flex items-center mb-4 sm:mb-0 space-x-3 rtl:space-x-reverse"
           >
             <span className="text-heading self-center text-2xl font-semibold whitespace-nowrap">
-              BoardWise
+              LegalScale
             </span>
           </a>
           <ul className="flex flex-wrap items-center mb-6 text-sm font-medium text-body sm:mb-0">
@@ -39,8 +39,8 @@ export const Footer = () => {
         <hr className="my-6 border-default sm:mx-auto lg:my-8" />
         <span className="block text-sm text-body sm:text-center">
           © {new Date().getFullYear()}{" "}
-          <a href="https://flowbite.com/" className="hover:underline">
-            BoardWise
+          <a href="/" className="hover:underline">
+            LegalScale
           </a>
           . All Rights Reserved.
         </span>

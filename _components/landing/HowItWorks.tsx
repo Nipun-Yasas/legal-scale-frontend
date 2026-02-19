@@ -2,21 +2,21 @@ export const HowItWorks = () => {
   const steps = [
     {
       number: "1",
-      title: "Search & Filter",
+      title: "Initiate Case or Agreement",
       description:
-        "Use our smart search to find boarding places that match your preferences and budget.",
+        "Create a new legal case or agreement draft, upload relevant documents, and assign a responsible legal officer.",
     },
     {
       number: "2",
-      title: "Compare & Review",
+      title: "Review & Approve",
       description:
-        "Browse photos, read reviews, and compare different options to find your perfect match.",
+        "Route the case or agreement through the structured approval workflow, collect reviewer comments, and obtain digital signatures.",
     },
     {
       number: "3",
-      title: "Book & Move In",
+      title: "Track & Close",
       description:
-        "Complete your booking securely and get ready to move into your new home!",
+        "Monitor real-time status, schedule court dates, receive expiry alerts, and close out with a complete audit trail.",
     },
   ];
 
@@ -27,7 +27,7 @@ export const HowItWorks = () => {
           How It Works
         </h2>
         <p className="text-xl text-textSecondary">
-          Finding your perfect boarding place is just three simple steps away
+          Managing legal cases and agreements is just three simple steps away
         </p>
       </div>
 

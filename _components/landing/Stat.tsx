@@ -1,5 +1,5 @@
 import { useId, ComponentProps } from "react";
-import { MapPin, Users, GraduationCap, Search } from "lucide-react";
+import { Briefcase, Users, FileText, Scale } from "lucide-react";
 
 import CountUp from "./CountUp";
 
@@ -37,32 +37,32 @@ export function Stat() {
 
 const stats = [
   {
-    title: "100+",
-    value: 150,
+    title: "500+",
+    value: 500,
     suffix: "+",
-    description: "Boarding places listed",
-    icon: <MapPin className="w-8 h-8" />,
+    description: "Legal cases managed",
+    icon: <Briefcase className="w-8 h-8" />,
   },
   {
     title: "50+",
     value: 50,
     suffix: "+",
-    description: "Number of owners",
+    description: "Legal officers onboarded",
     icon: <Users className="w-8 h-8" />,
   },
   {
-    title: "1000+",
-    value: 1000,
+    title: "1200+",
+    value: 1200,
     suffix: "+",
-    description: "University students registers",
-    icon: <GraduationCap className="w-8 h-8" />,
+    description: "Agreements processed",
+    icon: <FileText className="w-8 h-8" />,
   },
   {
-    title: "150+",
-    value: 150,
-    suffix: "+",
-    description: "Total boarding places found",
-    icon: <Search className="w-8 h-8" />,
+    title: "6",
+    value: 6,
+    suffix: "",
+    description: "Supported case types",
+    icon: <Scale className="w-8 h-8" />,
   },
 ];
 

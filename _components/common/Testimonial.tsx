@@ -25,8 +25,8 @@ export function Testimonial() {
             What our users say
           </h2>
           <p className="text-lg text-neutral-600 dark:text-neutral-400 mb-0 max-w-lg">
-            Hear from students and owners who have found success and community
-            through BoardWise.
+            Hear from legal officers and managers who have transformed their
+            operations with LegalScale.
           </p>
         </div>
 
@@ -62,27 +62,27 @@ export function Testimonial() {
 
 const testimonials = [
   {
-    name: "Sarah Chen",
-    role: "Student",
+    name: "Amara Perera",
+    role: "Senior Legal Officer",
     image:
       "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=256&q=80",
     testimonial:
-      "BoardWise made finding a place near campus incredibly easy. The verified listings gave me peace of mind, and I found a great spot within my budget in just two days.",
+      "LegalScale transformed how we handle cases. The structured workflows and real-time tracking have cut our case resolution time significantly. Everything is in one place.",
   },
   {
-    name: "Michael Ross",
-    role: "Owner",
+    name: "Rohan Silva",
+    role: "Agreement Manager",
     image:
       "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=256&q=80",
     testimonial:
-      "As a landlord, managing student tenants has never been smoother. The platform helps me connect with reliable students, and the listing process is straightforward.",
+      "Managing agreement approvals used to be a bottleneck. With LegalScale, the review and digital signing workflows are seamless and the audit trail gives us full confidence.",
   },
   {
-    name: "Emily Watson",
-    role: "Student",
+    name: "Dilini Fernando",
+    role: "Head of Compliance",
     image:
       "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=256&q=80",
     testimonial:
-      "I love the community features! Being able to see reviews from other students helped me avoid bad listings. Highly recommend for any university student.",
+      "The role-based access and secure document storage give our team the confidence that sensitive legal information is always protected. Highly recommend LegalScale.",
   },
 ];

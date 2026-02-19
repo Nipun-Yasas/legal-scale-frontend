@@ -6,6 +6,7 @@ import ThemeProvider from "../_components/common/ThemeProvider";
 import "./globals.css";
 import { Hourglass } from 'ldrs/react'
 import 'ldrs/react/Hourglass.css'
+import { AuthProvider } from "@/context/AuthContext";
 
 const inter = Inter({
   weight: ["300", "400", "500", "600"],
@@ -26,9 +27,9 @@ const robotoMono = Roboto_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "BoardWise - Find Your Dream Boarding Place",
+  title: "Legal Scale - Legal Document Management System",
   description:
-    "Helping university students find their perfect boarding place near campus",
+    "Integrated Legal Management System for Legal Case Handling and Agreement Approval Management.",
 };
 
 export default function RootLayout({
@@ -54,7 +55,7 @@ export default function RootLayout({
             defaultTheme="system"
             enableSystem
             disableTransitionOnChange
-          >{children}
+          ><AuthProvider>{children}</AuthProvider>
             <Toaster position="top-right" richColors />
           </ThemeProvider>
         </Suspense>
