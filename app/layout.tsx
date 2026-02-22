@@ -4,8 +4,7 @@ import { Suspense } from "react";
 import { Toaster } from "sonner";
 import ThemeProvider from "../_components/common/ThemeProvider";
 import "./globals.css";
-import { Hourglass } from 'ldrs/react'
-import 'ldrs/react/Hourglass.css'
+import { Loading } from "@/_components/common/Loading";
 import { AuthProvider } from "@/context/AuthContext";
 
 const inter = Inter({
@@ -44,12 +43,7 @@ export default function RootLayout({
       className={`${inter.variable} ${poppins.variable} ${robotoMono.variable}`}
     >
       <body className="antialiased">
-        <Suspense fallback={<Hourglass
-          size="40"
-          bgOpacity="0.1"
-          speed="1.75"
-          color="black"
-        />}>
+        <Suspense fallback={<Loading />}>
           <ThemeProvider
             attribute="class"
             defaultTheme="system"

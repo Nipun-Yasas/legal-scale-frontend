@@ -5,9 +5,13 @@ import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import Login from './Login';
 import Register from './Register';
-import { Boxy, Roundy, Spiky } from './Characters';
 
-export default function AuthContainer() {
+interface AuthContainerProps {
+  handleLogin: (values: any) => Promise<any>;
+  handleRegister: (values: any) => Promise<any>;
+}
+
+export default function AuthContainer({ handleLogin, handleRegister }: AuthContainerProps) {
   const [isSignup, setIsSignup] = useState(false);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
 
@@ -36,10 +40,10 @@ export default function AuthContainer() {
         <div className="w-full max-w-md my-auto">
           {/* We use opacity/display to swap forms smoothly */}
           <div className={`${isSignup ? 'block animate-fadeIn' : 'hidden'}`}>
-            <Register onSwitchToLogin={() => setIsSignup(false)} />
+            <Register onSwitchToLogin={() => setIsSignup(false)} handleRegister={handleRegister} />
           </div>
           <div className={`${!isSignup ? 'block animate-fadeIn' : 'hidden'}`}>
-            <Login onSwitchToSignup={() => setIsSignup(true)} />
+            <Login onSwitchToSignup={() => setIsSignup(true)} handleLogin={handleLogin} />
           </div>
         </div>
       </div>

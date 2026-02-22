@@ -4,17 +4,17 @@ import { useState } from 'react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { Mail, Lock, Eye as EyeIcon, EyeOff, AlertCircle } from 'lucide-react';
-import { useAuth } from '@/context/AuthContext';
+
 import { useRouter } from 'next/navigation';
 
 interface LoginProps {
   onSwitchToSignup: () => void;
+  handleLogin: (values: any) => Promise<any>;
 }
 
-export default function Login({ onSwitchToSignup }: LoginProps) {
+export default function Login({ onSwitchToSignup, handleLogin }: LoginProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
-  const { login } = useAuth();
   const router = useRouter();
 
   const formik = useFormik({
@@ -29,7 +29,7 @@ export default function Login({ onSwitchToSignup }: LoginProps) {
     onSubmit: async (values) => {
       setServerError(null);
       try {
-        await login(values);
+        await handleLogin(values);
       } catch (error: any) {
         if (error.response && error.response.data && error.response.data.error) {
           setServerError(error.response.data.error);
@@ -121,7 +121,7 @@ export default function Login({ onSwitchToSignup }: LoginProps) {
             onClick={() => router.push('/forgot-password')}
             className="font-medium text-primary hover:text-primary/80 transition-colors"
           >
-             Forgot password?
+            Forgot password?
           </button>
         </div>
 

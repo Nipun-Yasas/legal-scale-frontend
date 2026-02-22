@@ -11,16 +11,16 @@ import {
   EyeOff,
   AlertCircle,
 } from "lucide-react";
-import { useAuth } from '@/context/AuthContext';
+
 
 interface RegisterProps {
   onSwitchToLogin: () => void;
+  handleRegister: (values: any) => Promise<any>;
 }
 
-export default function Register({ onSwitchToLogin }: RegisterProps) {
+export default function Register({ onSwitchToLogin, handleRegister }: RegisterProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
-  const { register } = useAuth();
   const formik = useFormik({
     initialValues: {
       name: "",
@@ -45,7 +45,7 @@ export default function Register({ onSwitchToLogin }: RegisterProps) {
     onSubmit: async (values) => {
       setServerError(null);
       try {
-        await register(values);
+        await handleRegister(values);
       } catch (error: any) {
         if (error.response && error.response.data && error.response.data.error) {
           setServerError(error.response.data.error);

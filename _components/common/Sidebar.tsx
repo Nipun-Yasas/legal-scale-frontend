@@ -1,11 +1,12 @@
-"use client";
 
+import { useRef } from "react";
 import { cn } from "@/lib/utils";
-import React, { useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { Menu, X } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
 import { SidebarProvider, useSidebar } from "./SidebarContext";
+import Link from "next/link";
+import React from "react";
 
 interface Links {
   label: string;
@@ -46,7 +47,7 @@ export const DesktopSidebar = ({
   ...props
 }: React.ComponentProps<typeof motion.div>) => {
   const { open, setOpen, animate, isLocked } = useSidebar();
-  const timeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const handleMouseEnter = () => {
     if (timeoutRef.current) {
@@ -67,11 +68,14 @@ export const DesktopSidebar = ({
     <>
       <motion.div
         className={cn(
-          "h-full px-4 py-4 hidden  md:flex md:flex-col bg-sidebar w-[100px] shrink-0",
+          "h-full px-4 py-4 hidden md:flex md:flex-col bg-sidebar shrink-0",
           className
         )}
+        initial={{
+          width: animate ? (open ? "200px" : "60px") : "200px",
+        }}
         animate={{
-          width: animate ? (open ? "300px" : "60px") : "300px",
+          width: animate ? (open ? "200px" : "60px") : "200px",
         }}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
@@ -93,7 +97,7 @@ export const MobileSidebar = ({
     <>
       <div
         className={cn(
-          "h-16 px-6 flex flex-row md:hidden items-center justify-between w-full border-b border-borderPrimary bg-sidebar"
+          "h-16 px-6 flex flex-row md:hidden items-center justify-between w-full bg-transparent"
         )}
         {...props}
       >
@@ -144,7 +148,7 @@ export const SidebarLink = ({
 } & React.ComponentProps<"a">) => {
   const { open, animate } = useSidebar();
   return (
-    <a
+    <Link
       href={link.href}
       className={cn(
         "flex items-center justify-start gap-2  group/sidebar py-2",
@@ -152,11 +156,15 @@ export const SidebarLink = ({
       )}
       {...props}
     >
-      <div className="flex items-center justify-center shrink-0 w-11 sm:w-10">
+      <div className="flex items-center justify-center">
         {link.icon}
       </div>
 
       <motion.span
+        initial={{
+          display: animate ? (open ? "inline-block" : "none") : "inline-block",
+          opacity: animate ? (open ? 1 : 0) : 1,
+        }}
         animate={{
           display: animate ? (open ? "inline-block" : "none") : "inline-block",
           opacity: animate ? (open ? 1 : 0) : 1,
@@ -165,6 +173,6 @@ export const SidebarLink = ({
       >
         {link.label}
       </motion.span>
-    </a>
+    </Link>
   );
 };
