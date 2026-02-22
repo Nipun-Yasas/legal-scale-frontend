@@ -3,7 +3,7 @@
 import { cn } from "@/lib/utils";
 import React, { useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { IconMenu2, IconX } from "@tabler/icons-react";
+import { Menu, X } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
 import { SidebarProvider, useSidebar } from "./SidebarContext";
 
@@ -93,14 +93,14 @@ export const MobileSidebar = ({
     <>
       <div
         className={cn(
-          "h-10 px-4 py-4 flex flex-row md:hidden items-center justify-between w-full"
+          "h-16 px-6 flex flex-row md:hidden items-center justify-between w-full border-b border-borderPrimary bg-sidebar"
         )}
         {...props}
       >
         <ThemeToggle />
-        <div className="flex justify-end z-20 w-full">
-          <IconMenu2
-            className="text-textPrimary"
+        <div className="flex justify-end z-20">
+          <Menu
+            className="text-textPrimary cursor-pointer"
             onClick={() => setOpen(!open)}
           />
         </div>
@@ -115,15 +115,15 @@ export const MobileSidebar = ({
                 ease: "easeInOut",
               }}
               className={cn(
-                "fixed h-full w-full inset-0 bg-sidebar p-10 z-[100] flex flex-col justify-between",
+                "fixed h-full w-full inset-0 bg-sidebar p-6 sm:p-10 z-[100] flex flex-col justify-between",
                 className
               )}
             >
               <div
-                className="absolute right-10 top-10 z-50 text-textSecondary"
+                className="absolute right-6 top-6 sm:right-10 sm:top-10 z-50 text-textSecondary"
                 onClick={() => setOpen(!open)}
               >
-                <IconX />
+                <X className="cursor-pointer" />
               </div>
               {children}
             </motion.div>
