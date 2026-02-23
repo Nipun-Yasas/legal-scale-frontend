@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { Sidebar, SidebarBody, SidebarLink } from "@/_components/common/Sidebar";
 import { ThemeToggle } from "@/_components/common/ThemeToggle";
-import { LogOut } from "lucide-react";
+import { LogOut, Scale } from "lucide-react";
 import { motion } from "motion/react";
 import { useAuth } from "@/context/AuthContext";
 import { getNavigation } from "@/lib/getNavigation";
@@ -25,6 +25,9 @@ export default function RoleLayout({
           <div className="flex flex-col flex-1 overflow-y-auto overflow-x-hidden">
             {/* Logo */}
             <div className="flex items-center gap-2 py-2 mb-6">
+              <div className="flex items-center justify-center shrink-0 ">
+                <Scale className="h-6 w-6 text-primary shrink-0" />
+              </div>
               <motion.span
                 animate={{
                   display: open ? "inline-block" : "none",

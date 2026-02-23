@@ -21,7 +21,7 @@ async function proxy(req: NextRequest) {
         const res = await fetch(targetUrl, {
             method: req.method,
             headers,
-            body: req.method !== "GET" && req.method !== "HEAD" ? await req.text() : undefined,
+            body: req.method !== "GET" && req.method !== "HEAD" ? await req.arrayBuffer() : undefined,
         });
 
         const responseHeaders = new Headers(res.headers);

@@ -44,7 +44,7 @@ export default function UserLayout({
           <div className="flex flex-col flex-1 overflow-y-auto overflow-x-hidden">
             {/* Logo */}
             <div className="flex items-center gap-2 py-2 mb-6">
-              <div className="flex items-center justify-center shrink-0 w-11 sm:w-10">
+              <div className="flex items-center justify-center shrink-0 ">
                 <Scale className="h-6 w-6 text-primary shrink-0" />
               </div>
               <motion.span

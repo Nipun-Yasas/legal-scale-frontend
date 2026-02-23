@@ -1,58 +1,95 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
-import { legalOfficers } from "../_data/data";
-import { LegalOfficer, OfficerStatus } from "../_data/types";
+import React, { useState, useMemo, useEffect } from "react";
 import { cn } from "@/lib/utils";
+import axiosInstance, { API_PATHS } from "@/lib/axios";
 import {
   Search,
   X,
   UserPlus,
   ChevronDown,
-  Briefcase,
   Mail,
-  CalendarDays,
   AlertCircle,
 } from "lucide-react";
 
-/* ── Badge helpers ── */
-const statusBadge: Record<OfficerStatus, string> = {
-  Active:   "bg-green-500/15 text-green-400 border border-green-500/30",
-  "On Leave": "bg-yellow-500/15 text-yellow-400 border border-yellow-500/30",
-  Inactive: "bg-slate-500/15 text-slate-400 border border-slate-500/30",
-};
-
-function fmt(d: string) {
-  return new Date(d).toLocaleDateString("en-GB", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  });
+export interface ApiOfficer {
+  officerDetails: {
+    id: number;
+    fullName: string;
+    email: string;
+    roleId: number;
+    roleName: string;
+    legalDepartmentMember: boolean;
+    banned: boolean;
+  };
+  totalAssignedCases: number;
+  caseCountsByStatus: Record<string, number>;
 }
 
-/* ── Mock unassigned cases for the assign dropdown ── */
-const unassignedCases = [
-  { id: "CAS-015", title: "Network Outage Liability Claim", type: "Litigation" },
-  { id: "CAS-016", title: "Supplier Overpayment Recovery", type: "Contract Dispute" },
-  { id: "CAS-017", title: "Customer Data Breach — Class Action", type: "Regulatory" },
-  { id: "CAS-018", title: "Roaming Agreement Dispute", type: "Contract Dispute" },
-];
+export interface NewCase {
+  id: number;
+  caseTitle: string;
+  referenceNumber: string;
+}
 
 /* ── Assign Modal ── */
 function AssignModal({
   officer,
   onClose,
+  onSuccess,
 }: {
-  officer: LegalOfficer;
+  officer: ApiOfficer;
   onClose: () => void;
+  onSuccess: () => void;
 }) {
   const [selectedCase, setSelectedCase] = useState("");
   const [note, setNote] = useState("");
   const [done, setDone] = useState(false);
+  const [newCases, setNewCases] = useState<NewCase[]>([]);
+  const [loadingCases, setLoadingCases] = useState(true);
+  const [assigning, setAssigning] = useState(false);
 
-  function handleAssign() {
+  useEffect(() => {
+    const fetchNewCases = async () => {
+      try {
+        const response = await axiosInstance.get(API_PATHS.SUPERVISOR.GET_ALL_NEW_CASES);
+        let fetchedCases = [];
+        if (Array.isArray(response.data)) {
+          fetchedCases = response.data;
+        } else if (response.data?.data && Array.isArray(response.data.data)) {
+          fetchedCases = response.data.data;
+        }
+        setNewCases(fetchedCases);
+      } catch (error) {
+        console.error("Failed to fetch new cases", error);
+      } finally {
+        setLoadingCases(false);
+      }
+    };
+    fetchNewCases();
+  }, []);
+
+  async function handleAssign() {
     if (!selectedCase) return;
-    setDone(true);
+    setAssigning(true);
+    try {
+      await axiosInstance.post(API_PATHS.SUPERVISOR.ASSIGN_CASE(selectedCase), {
+        officerId: officer.officerDetails.id,
+      });
+
+      if (note.trim()) {
+        await axiosInstance.post(API_PATHS.SUPERVISOR.ADD_COMMENT(selectedCase), {
+          comment: note.trim(),
+        });
+      }
+
+      setDone(true);
+      onSuccess();
+    } catch (error) {
+      console.error("Failed to assign case or add comment", error);
+    } finally {
+      setAssigning(false);
+    }
   }
 
   return (
@@ -69,7 +106,7 @@ function AssignModal({
             <h2 className="text-lg font-bold text-textPrimary">Assign Case</h2>
             <p className="text-sm text-textSecondary mt-0.5">
               Assign a case to{" "}
-              <span className="text-textPrimary font-medium">{officer.name}</span>
+              <span className="text-textPrimary font-medium">{officer.officerDetails.fullName}</span>
             </p>
           </div>
           <button onClick={onClose} className="text-textSecondary hover:text-textPrimary">
@@ -86,8 +123,8 @@ function AssignModal({
             </div>
             <p className="text-textPrimary font-semibold">Case Assigned Successfully</p>
             <p className="text-sm text-textSecondary">
-              {unassignedCases.find((c) => c.id === selectedCase)?.title} has been assigned to{" "}
-              {officer.name}.
+              {newCases.find((c) => c.id.toString() === selectedCase)?.caseTitle} has been assigned to{" "}
+              {officer.officerDetails.fullName}.
             </p>
             <button
               onClick={onClose}
@@ -100,23 +137,23 @@ function AssignModal({
           <div className="p-6 space-y-4">
             {/* Officer info */}
             <div className="flex items-center gap-3 rounded-lg border border-borderPrimary bg-hoverPrimary px-4 py-3">
-              <div className="h-9 w-9 rounded-full bg-primary/20 text-primary text-sm font-bold flex items-center justify-center shrink-0">
-                {officer.avatar}
+              <div className="h-9 w-9 rounded-full bg-primary/20 text-primary text-sm font-bold flex items-center justify-center shrink-0 uppercase">
+                {officer.officerDetails.fullName.charAt(0)}
               </div>
               <div>
-                <p className="text-sm font-medium text-textPrimary">{officer.name}</p>
+                <p className="text-sm font-medium text-textPrimary">{officer.officerDetails.fullName}</p>
                 <p className="text-xs text-textSecondary">
-                  {officer.specialization} · {officer.activeCases} active case{officer.activeCases !== 1 ? "s" : ""}
+                  {officer.totalAssignedCases} active case{officer.totalAssignedCases !== 1 ? "s" : ""}
                 </p>
               </div>
             </div>
 
             {/* Warning if busy */}
-            {officer.activeCases >= 4 && (
+            {officer.totalAssignedCases >= 4 && (
               <div className="flex items-center gap-2 rounded-lg border border-orange-500/30 bg-orange-500/10 px-4 py-2">
                 <AlertCircle className="h-4 w-4 text-orange-400 shrink-0" />
                 <p className="text-xs text-orange-400">
-                  This officer already has {officer.activeCases} active cases. Consider reassigning.
+                  This officer already has {officer.totalAssignedCases} assigned cases.
                 </p>
               </div>
             )}
@@ -128,12 +165,15 @@ function AssignModal({
                 <select
                   value={selectedCase}
                   onChange={(e) => setSelectedCase(e.target.value)}
-                  className="w-full appearance-none pl-3 pr-8 py-2.5 text-sm rounded-lg border border-borderPrimary bg-input text-textPrimary focus:outline-none focus:ring-2 focus:ring-primary/50"
+                  disabled={loadingCases}
+                  className="w-full appearance-none pl-3 pr-8 py-2.5 text-sm rounded-lg border border-borderPrimary bg-input text-textPrimary focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:opacity-50"
                 >
-                  <option value="">— Choose unassigned case —</option>
-                  {unassignedCases.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.id} — {c.title}
+                  <option value="">
+                    {loadingCases ? "Loading cases..." : "— Choose unassigned case —"}
+                  </option>
+                  {newCases.map((c) => (
+                    <option key={c.id} value={c.id.toString()}>
+                      {c.referenceNumber} — {c.caseTitle}
                     </option>
                   ))}
                 </select>
@@ -163,10 +203,10 @@ function AssignModal({
               </button>
               <button
                 onClick={handleAssign}
-                disabled={!selectedCase}
-                className="flex-1 py-2.5 rounded-lg bg-primary text-white text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed"
+                disabled={!selectedCase || assigning}
+                className="flex-1 py-2.5 rounded-lg bg-primary text-white text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center"
               >
-                Assign Case
+                {assigning ? "Assigning..." : "Assign Case"}
               </button>
             </div>
           </div>
@@ -179,22 +219,41 @@ function AssignModal({
 /* ── Main Page ── */
 export default function OfficersPage() {
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState<"All" | OfficerStatus>("All");
-  const [assignTarget, setAssignTarget] = useState<LegalOfficer | null>(null);
+  const [officers, setOfficers] = useState<ApiOfficer[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [assignTarget, setAssignTarget] = useState<ApiOfficer | null>(null);
+
+  const fetchOfficers = async () => {
+    try {
+      const response = await axiosInstance.get(API_PATHS.SUPERVISOR.GET_LEGAL_OFFICERS);
+      let fetchedOfficers = [];
+      if (Array.isArray(response.data)) {
+        fetchedOfficers = response.data;
+      } else if (response.data?.data && Array.isArray(response.data.data)) {
+        fetchedOfficers = response.data.data;
+      }
+      setOfficers(fetchedOfficers);
+    } catch (error) {
+      console.error("Failed to fetch officers", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchOfficers();
+  }, []);
 
   const filtered = useMemo(() => {
-    return (legalOfficers as LegalOfficer[]).filter((o) => {
+    return officers.filter((o) => {
       const q = search.toLowerCase();
-      const matchSearch =
+      return (
         !q ||
-        o.name.toLowerCase().includes(q) ||
-        o.email.toLowerCase().includes(q) ||
-        o.specialization.toLowerCase().includes(q) ||
-        o.id.toLowerCase().includes(q);
-      const matchStatus = statusFilter === "All" || o.status === statusFilter;
-      return matchSearch && matchStatus;
+        o.officerDetails.fullName.toLowerCase().includes(q) ||
+        o.officerDetails.email.toLowerCase().includes(q)
+      );
     });
-  }, [search, statusFilter]);
+  }, [search, officers]);
 
   return (
     <div className="space-y-6">
@@ -202,31 +261,8 @@ export default function OfficersPage() {
       <div>
         <h1 className="text-2xl font-bold text-textPrimary">Legal Officers</h1>
         <p className="text-textSecondary text-sm mt-1">
-          Manage and assign cases to your legal team — {legalOfficers.length} officers total.
+          Manage and assign cases
         </p>
-      </div>
-
-      {/* Summary chips */}
-      <div className="flex flex-wrap gap-3">
-        {(["All", "Active", "On Leave", "Inactive"] as ("All" | OfficerStatus)[]).map((s) => {
-          const count = s === "All" ? legalOfficers.length : legalOfficers.filter((o) => o.status === s).length;
-          return (
-            <button
-              key={s}
-              onClick={() => setStatusFilter(s as "All" | OfficerStatus)}
-              className={cn(
-                "px-4 py-1.5 rounded-full text-xs font-medium border transition-all",
-                statusFilter === s && s !== "All"
-                  ? statusBadge[s as OfficerStatus]
-                  : statusFilter === s
-                  ? "border-primary text-primary bg-primary/10"
-                  : "border-borderPrimary text-textSecondary hover:bg-hoverPrimary"
-              )}
-            >
-              {s} · {count}
-            </button>
-          );
-        })}
       </div>
 
       {/* Search */}
@@ -235,7 +271,7 @@ export default function OfficersPage() {
         <input
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search by name, email, specialization..."
+          placeholder="Search by name, email..."
           className="w-full pl-9 pr-9 py-2 text-sm rounded-lg border border-borderPrimary bg-input text-textPrimary placeholder:text-textSecondary focus:outline-none focus:ring-2 focus:ring-primary/50"
         />
         {search && (
@@ -253,26 +289,33 @@ export default function OfficersPage() {
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-borderPrimary text-textSecondary">
+              <tr className="border-b border-borderPrimary text-textSecondary bg-hoverPrimary/50">
                 <th className="text-left px-6 py-3 font-medium">Officer</th>
-                <th className="text-left px-6 py-3 font-medium">Specialization</th>
-                <th className="text-left px-6 py-3 font-medium">Active Cases</th>
-                <th className="text-left px-6 py-3 font-medium">Status</th>
-                <th className="text-left px-6 py-3 font-medium">Joined</th>
+                <th className="text-left px-6 py-3 font-medium">Total Assigned Cases</th>
+                <th className="text-left px-6 py-3 font-medium text-blue-500">New Cases</th>
+                <th className="text-left px-6 py-3 font-medium text-green-500">Active Cases</th>
+                <th className="text-left px-6 py-3 font-medium text-orange-500">On Hold</th>
+                <th className="text-left px-6 py-3 font-medium text-red-500">Closed Cases</th>
                 <th className="text-left px-6 py-3 font-medium">Actions</th>
               </tr>
             </thead>
             <tbody>
-              {filtered.length === 0 ? (
+              {loading ? (
                 <tr>
-                  <td colSpan={6} className="text-center py-12 text-textSecondary">
+                  <td colSpan={7} className="text-center py-12 text-textSecondary">
+                    Loading officers...
+                  </td>
+                </tr>
+              ) : filtered.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="text-center py-12 text-textSecondary">
                     No officers match your search.
                   </td>
                 </tr>
               ) : (
                 filtered.map((o, i) => (
                   <tr
-                    key={o.id}
+                    key={o.officerDetails.id}
                     className={cn(
                       "border-b border-borderPrimary hover:bg-hoverPrimary transition-colors",
                       i === filtered.length - 1 && "border-none"
@@ -281,65 +324,52 @@ export default function OfficersPage() {
                     {/* Officer */}
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="h-9 w-9 rounded-full bg-primary/20 text-primary text-xs font-bold flex items-center justify-center shrink-0">
-                          {o.avatar}
+                        <div className="h-9 w-9 rounded-full bg-primary/20 text-primary text-xs font-bold flex items-center justify-center shrink-0 uppercase">
+                          {o.officerDetails.fullName.charAt(0)}
                         </div>
                         <div>
-                          <p className="text-textPrimary font-medium">{o.name}</p>
+                          <p className="text-textPrimary font-medium">{o.officerDetails.fullName}</p>
                           <p className="text-xs text-textSecondary flex items-center gap-1">
-                            <Mail className="h-3 w-3" /> {o.email}
+                            <Mail className="h-3 w-3" /> {o.officerDetails.email}
                           </p>
                         </div>
                       </div>
                     </td>
-                    {/* Specialization */}
+                    {/* Total Assigned Cases */}
                     <td className="px-6 py-4">
-                      <p className="text-textSecondary flex items-center gap-1.5">
-                        <Briefcase className="h-4 w-4 shrink-0" />
-                        {o.specialization}
-                      </p>
+                      <span className="font-semibold tabular-nums text-sm text-textPrimary">
+                        {o.totalAssignedCases}
+                      </span>
+                    </td>
+                    {/* New Cases */}
+                    <td className="px-6 py-4">
+                      <span className="font-medium tabular-nums text-sm text-textSecondary">
+                        {o.caseCountsByStatus?.NEW || 0}
+                      </span>
                     </td>
                     {/* Active Cases */}
                     <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-20 h-2 rounded-full bg-borderPrimary overflow-hidden">
-                          <div
-                            className={cn(
-                              "h-full rounded-full",
-                              o.activeCases >= 4 ? "bg-orange-400" : "bg-primary"
-                            )}
-                            style={{ width: `${Math.min((o.activeCases / 5) * 100, 100)}%` }}
-                          />
-                        </div>
-                        <span
-                          className={cn(
-                            "font-semibold tabular-nums text-sm",
-                            o.activeCases >= 4 ? "text-orange-400" : "text-textPrimary"
-                          )}
-                        >
-                          {o.activeCases}
-                        </span>
-                      </div>
-                    </td>
-                    {/* Status */}
-                    <td className="px-6 py-4">
-                      <span className={cn("px-2.5 py-1 rounded-full text-xs font-medium", statusBadge[o.status])}>
-                        {o.status}
+                      <span className="font-medium tabular-nums text-sm text-textSecondary">
+                        {o.caseCountsByStatus?.ACTIVE || 0}
                       </span>
                     </td>
-                    {/* Joined */}
-                    <td className="px-6 py-4 text-textSecondary text-xs">
-                      <span className="flex items-center gap-1">
-                        <CalendarDays className="h-3.5 w-3.5" />
-                        {fmt(o.joinedDate)}
+                    {/* On Hold */}
+                    <td className="px-6 py-4">
+                      <span className="font-medium tabular-nums text-sm text-textSecondary">
+                        {o.caseCountsByStatus?.ON_HOLD || 0}
+                      </span>
+                    </td>
+                    {/* Closed Cases */}
+                    <td className="px-6 py-4">
+                      <span className="font-medium tabular-nums text-sm text-textSecondary">
+                        {o.caseCountsByStatus?.CLOSED || 0}
                       </span>
                     </td>
                     {/* Actions */}
                     <td className="px-6 py-4">
                       <button
                         onClick={() => setAssignTarget(o)}
-                        disabled={o.status !== "Active"}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 text-primary text-xs font-medium border border-primary/30 hover:bg-primary/20 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 text-primary text-xs font-medium border border-primary/30 hover:bg-primary/20 transition-colors"
                       >
                         <UserPlus className="h-3.5 w-3.5" />
                         Assign Case
@@ -353,13 +383,17 @@ export default function OfficersPage() {
         </div>
       </div>
 
-      <p className="text-xs text-textSecondary">
-        Showing {filtered.length} of {legalOfficers.length} officers
+      <p className="text-xs text-textSecondary mt-2">
+        Showing {filtered.length} of {officers.length} officers
       </p>
 
       {/* Assign modal */}
       {assignTarget && (
-        <AssignModal officer={assignTarget} onClose={() => setAssignTarget(null)} />
+        <AssignModal
+          officer={assignTarget}
+          onClose={() => setAssignTarget(null)}
+          onSuccess={fetchOfficers}
+        />
       )}
     </div>
   );

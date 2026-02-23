@@ -1,4 +1,5 @@
 import axios from "axios";
+import { Download } from "lucide-react";
 
 const axiosInstance = axios.create({
   baseURL: "/api",
@@ -20,6 +21,24 @@ export const API_PATHS = {
     CHANGE_ROLE: "admin/change-role",
     BAN_USER: "admin/ban",
     UNBAN_USER: "admin/unban",
+  },
+  DOC: {
+    DOWNLOAD_DOC: (Id: string) => `/${Id}/download`,
+  },
+  CASE: {
+    ATTACHMENT_DOCUMENT: (Id: string) => `cases/${Id}/attachments`,
+  },
+  SUPERVISOR: {
+    CREATE_CASE: "supervisor/cases",
+    GET_ALL_NEW_CASES: "supervisor/cases/new",
+    GET_OWN_CASES: "supervisor/cases/my",
+    GET_LEGAL_OFFICERS: "supervisor/cases/officers",
+    ASSIGN_CASE: (Id: string) => `supervisor/cases/${Id}/assign`,
+    ADD_COMMENT: (Id: string) => `supervisor/cases/${Id}/comments`,
+    GET_COMMENT_AND_REMARKS: "supervisor/cases/activities",
+    ATTACH_DOCUMENTS: (Id: string) => `supervisor/cases/${Id}/attachments`,
+    GET_REVIEWABLE_DOCUMENTS: "supervisor/reviewable-documents",
+    GET_CASE_SHIFT_REQUESTS: "supervisor/case-shift-requests",
   }
 };
 

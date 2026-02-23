@@ -21,7 +21,7 @@ export default function AuthPage() {
       } else if (role === "LEGAL_OFFICER") {
         router.push('/legal-officer/dashboard');
       } else if (role === "LEGAL_SUPERVISOR") {
-        router.push('/legal-supervisor/dashboard');
+        router.push('/supervisor');
       } else if (role === "AGREEMENT_REVIEWER") {
         router.push('/agreement-reviewer/dashboard');
       } else if (role === "AGREEMENT_APPROVER") {
