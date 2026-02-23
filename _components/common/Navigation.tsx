@@ -13,6 +13,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Button } from "./Button";
 import { ThemeToggle } from "./ThemeToggle";
+import { useAuth } from "@/context/AuthContext";
 
 const navItems = [
   { name: "Home", href: "/" },
@@ -28,6 +29,7 @@ export const Navigation = () => {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const { user } = useAuth();
 
   useEffect(() => {
     setMounted(true);
@@ -53,7 +55,17 @@ export const Navigation = () => {
 
   const getLinkHref = (item: { name: string; href: string }) => {
     if (item.name === "Dashboard") {
-      return "/auth";
+      if (!user) return "/auth";
+
+      const rolePathMap: Record<string, string> = {
+        SYSTEM_ADMIN: '/admin',
+        LEGAL_SUPERVISOR: '/supervisor',
+        LEGAL_OFFICER: '/officer',
+        MANAGEMENT: '/manager',
+        USER: '/user',
+      };
+
+      return rolePathMap[user.role] || "/auth";
     }
     return item.href;
   };

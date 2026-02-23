@@ -31,6 +31,7 @@ Legal Scale utilizes strict Role-Based Access Control (RBAC). The following role
   - Overview activities and track case remarks.
   - View, approve, or reject supervisor-level agreements.
   - Digitally sign finalized agreements.
+  - Audit trail for commenting
 
 - **Officer (`app/(ui)/officer/`)**
   - Work directly on assigned legal cases.
@@ -45,7 +46,7 @@ Legal Scale utilizes strict Role-Based Access Control (RBAC). The following role
 
 - **User (`app/(ui)/user/`)**
   - Standard system participants.
-  - View user-specific information.
+  - View user-specific(view created agreements) information.
 
 ---
 
@@ -97,9 +98,9 @@ To keep component styling robust and typed, the project relies on **Tailwind CSS
 ### 2. Agreement Lifecycle Flow
 1. **Drafting**: System user/role drafts an agreement.
 2. **Reviewing**: Officer reviews the agreement (`REQUEST_REVIEW`).
-3. **Revisions**: Revisions act as a communication channel; Officers respond to them (`RESPONSE_REVISION`).
+3. **Revisions**: Revisions act as a communication channel; Officers respond to them (`PENDING_APPROVAL`).
 4. **Approval**: Agreement is pushed to Supervisor for `APPROVAL` or rejection.
-5. **Finalization**: Agreement is signed (`SIGN`).
+5. **Finalization**: Agreement is signed (`SIGN`) as final approval change to `EXECUTED`.
 
 ---
 
@@ -109,3 +110,35 @@ To keep component styling robust and typed, the project relies on **Tailwind CSS
 - **Icons:** Use **Lucide React** for consistent SVG-based iconography.
 - **Client Components:** Add `"use client"` directive strictly only on the files that utilize hooks (e.g., `useState`, `useEffect`) or context, maximizing Next.js's server-component performance benefits for standard display files.
 - **Environment variables:** Use `NEXT_PUBLIC_` for variables that are absolutely required to be exposed in the browser. Store backend secrets securely.
+
+## To be implemented
+
+- **Admin (`app/(ui)/admin/`)**
+  - Modify roles and authority levels.
+  - Change System configurations
+
+- **Supervisor (`app/(ui)/supervisor/`)**
+  - Case shift changes
+  - Additng additional details based on case type after approval
+  - Court & Event Scheduling
+  - Expiry & Renewal Alerts
+  - Agreement Archiving
+  - Agreement–Case Linking
+
+  - **Manager (`app/(ui)/manager/`)**
+  - Financial Exposure Chart.
+  - Report section.
+
+## 🔑 Demo Credentials
+
+> **⚠️ Security Warning:** This section is for **demo purposes only**. Exposing these credentials in a production environment is a security risk. Database administrators can manage or remove these users as needed.
+
+| Role | Email | Password |
+| :--- | :--- | :--- |
+| **System Admin** | `admin@gmail.com` | `1234` |
+| **User** | `user@gmail.com` | `1234` |
+| **Officer** | `officer@gmail.com` | `1234` |
+| **Officer (Alt)** | `Officer@gmail.com` | `1234` |
+| **Supervisor Level 1** | `supervisor1@gmail.com` | `1234` |
+| **Supervisor Level 2** | `supervisor2@gmail.com` | `1234` |
+| **Manager** | `manager@gmail.com` | `1234` |

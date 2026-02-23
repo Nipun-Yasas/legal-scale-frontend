@@ -1,5 +1,4 @@
 import axios from "axios";
-import { Download } from "lucide-react";
 
 const axiosInstance = axios.create({
   baseURL: "/api",
