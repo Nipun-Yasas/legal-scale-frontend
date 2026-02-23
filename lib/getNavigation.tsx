@@ -9,7 +9,8 @@ import {
     FileSearch,
     GitBranch,
     Briefcase,
-    ActivitySquare
+    ActivitySquare,
+    View
 } from "lucide-react";
 
 export const getNavigation = (role?: string) => {
@@ -64,6 +65,11 @@ export const getNavigation = (role?: string) => {
                     href: "/supervisor/case-shifts",
                     icon: <GitBranch className="h-5 w-5 shrink-0 text-textSecondary" />,
                 },
+                {
+                    label: "Agreements",
+                    href: "/supervisor/agreements",
+                    icon: <HandshakeIcon className="h-5 w-5 shrink-0 text-textSecondary" />,
+                },
             ];
 
         case "LEGAL_OFFICER":
@@ -83,9 +89,12 @@ export const getNavigation = (role?: string) => {
                     href: "/officer/activity",
                     icon: <ActivitySquare className="h-5 w-5 shrink-0 text-textSecondary" />,
                 },
+                {
+                    label: "Agreements",
+                    href: "/officer/agreements",
+                    icon: <HandshakeIcon className="h-5 w-5 shrink-0 text-textSecondary" />,
+                },
             ];
-        case "AGREEMENT_REVIEWER":
-        case "AGREEMENT_APPROVER":
         case "MANAGEMENT":
             return [
                 {
@@ -110,12 +119,17 @@ export const getNavigation = (role?: string) => {
                     label: "Dashboard",
                     href: "/user",
                     icon: <LayoutDashboard className="h-5 w-5 shrink-0 text-textSecondary" />,
-                },
-                {
-                    label: "Agreements",
-                    href: "/user/agreements",
+                  },
+                  {
+                    label: "Create Agreements",
+                    href: "/user/create-agreements",
                     icon: <HandshakeIcon className="h-5 w-5 shrink-0 text-textSecondary" />,
-                },
+                  },
+                  {
+                    label: "View Agreements",
+                    href: "/user/viewagreements",
+                    icon: <View className="h-5 w-5 shrink-0 text-textSecondary" />,
+                  },
             ];
         default:
             return [];

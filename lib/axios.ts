@@ -37,11 +37,26 @@ export const API_PATHS = {
     ADD_COMMENT: (Id: string) => `supervisor/cases/${Id}/comments`,
     GET_COMMENT_AND_REMARKS: "supervisor/cases/activities",
     ATTACH_DOCUMENTS: (Id: string) => `supervisor/cases/${Id}/attachments`,
+
+    // Agreements
+    APPROVAL: (Id: string) => `supervisor/agreements/${Id}/approve-reject`,
+    SIGN: (Id: string) => `supervisor/agreements/${Id}/sign`,
   },
   OFFICER: {
     GET_ASSIGNED_CASES: "officer/cases",
     CHANGE_STATUS: (Id: string) => `officer/cases/${Id}/status`,
     ADD_COMMENT: (Id: string) => `officer/cases/${Id}/comments`,
+
+    //Agreements
+    REVIEW_AGREEMENT: (Id: string) => `officer/agreements/${Id}/pending-approval`,
+    RESPONSE_REVISION: (Id: string) => `agreements/${Id}/respond-revision`,
+  },
+  AGREEMENT: {
+    CREATE: "agreements",
+    GET_ALL: "agreements/all",
+    GET_OWN: "agreements/my",
+    REQUEST_REVIEW: (Id: string) => `agreements/${Id}/request-review`,
+    ADD_REVERSIONS: (Id: string) => `agreements/${Id}/revisions`
   }
 };
 
