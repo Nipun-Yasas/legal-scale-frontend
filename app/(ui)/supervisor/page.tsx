@@ -223,7 +223,7 @@ export default function SupervisorPage() {
         <div className="rounded-xl border border-borderPrimary bg-backgroundSecondary overflow-hidden">
           <div className="px-4 sm:px-6 py-4 border-b border-borderPrimary flex items-center justify-between">
             <h2 className="text-base font-semibold text-textPrimary">Pending Documents</h2>
-            <a href="/legal_supervisor_dashboard/documents" className="text-xs text-primary hover:underline">
+            <a href="/supervisor/documents" className="text-xs text-primary hover:underline">
               View all →
             </a>
           </div>
@@ -270,7 +270,7 @@ export default function SupervisorPage() {
         <div className="rounded-xl border border-borderPrimary bg-backgroundSecondary overflow-hidden">
           <div className="px-4 sm:px-6 py-4 border-b border-borderPrimary flex items-center justify-between">
             <h2 className="text-base font-semibold text-textPrimary">Pending Case Type Shifts</h2>
-            <a href="/legal_supervisor_dashboard/case-shifts" className="text-xs text-primary hover:underline">
+            <a href="/supervisor/case-shifts" className="text-xs text-primary hover:underline">
               View all →
             </a>
           </div>

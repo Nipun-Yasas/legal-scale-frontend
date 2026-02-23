@@ -37,8 +37,11 @@ export const API_PATHS = {
     ADD_COMMENT: (Id: string) => `supervisor/cases/${Id}/comments`,
     GET_COMMENT_AND_REMARKS: "supervisor/cases/activities",
     ATTACH_DOCUMENTS: (Id: string) => `supervisor/cases/${Id}/attachments`,
-    GET_REVIEWABLE_DOCUMENTS: "supervisor/reviewable-documents",
-    GET_CASE_SHIFT_REQUESTS: "supervisor/case-shift-requests",
+  },
+  OFFICER: {
+    GET_ASSIGNED_CASES: "officer/cases",
+    CHANGE_STATUS: (Id: string) => `officer/cases/${Id}/status`,
+    ADD_COMMENT: (Id: string) => `officer/cases/${Id}/comments`,
   }
 };
 

@@ -7,7 +7,9 @@ import {
     Settings,
     ShieldCheck,
     FileSearch,
-    GitBranch
+    GitBranch,
+    Briefcase,
+    ActivitySquare
 } from "lucide-react";
 
 export const getNavigation = (role?: string) => {
@@ -65,6 +67,23 @@ export const getNavigation = (role?: string) => {
             ];
 
         case "LEGAL_OFFICER":
+            return [
+                {
+                    label: "Dashboard",
+                    href: "/officer",
+                    icon: <LayoutDashboard className="h-5 w-5 shrink-0 text-textSecondary" />,
+                },
+                {
+                    label: "My Cases",
+                    href: "/officer/cases",
+                    icon: <Briefcase className="h-5 w-5 shrink-0 text-textSecondary" />,
+                },
+                {
+                    label: "Activity",
+                    href: "/officer/activity",
+                    icon: <ActivitySquare className="h-5 w-5 shrink-0 text-textSecondary" />,
+                },
+            ];
         case "AGREEMENT_REVIEWER":
         case "AGREEMENT_APPROVER":
         case "MANAGEMENT":
