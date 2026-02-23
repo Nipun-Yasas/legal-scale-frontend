@@ -129,6 +129,16 @@ To keep component styling robust and typed, the project relies on **Tailwind CSS
   - Financial Exposure Chart.
   - Report section.
 
+## To be improved
+
+- Manage states and data flow from parent components to child components.
+- Create reusable components instead of creating new components for each page to improve performance.
+- 
+
+## Important notice
+
+- The backend is currently hosted on the Render free tier. When the backend doesn't receive any requests for a period of time, the server spins down. When a new request comes in, the server has to start up again, which means the initial response may take some time (up to 50 seconds or more).
+
 ## 🔑 Demo Credentials
 
 > **⚠️ Security Warning:** This section is for **demo purposes only**. Exposing these credentials in a production environment is a security risk. Database administrators can manage or remove these users as needed.
