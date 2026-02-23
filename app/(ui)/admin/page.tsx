@@ -42,7 +42,34 @@ export default function AdminPage() {
         const fetchUserCounts = async () => {
             try {
                 const { data } = await axiosInstance.get(API_PATHS.ADMIN.GET_USER_COUNT);
-                setRoleCounts(prev => ({ ...prev, ...data }));
+                setRoleCounts(prev => {
+                    const newCounts = { ...prev };
+
+                    if (Array.isArray(data)) {
+                        // If backend returns an array of objects
+                        data.forEach(item => {
+                            if (item && item.role && typeof item.count === 'number' && item.role in newCounts) {
+                                newCounts[item.role] = item.count;
+                            } else if (item && typeof item === 'object') {
+                                // Fallback for arrays with positional objects like {"0": "ROLE", "1": count}
+                                const values = Object.values(item);
+                                if (values.length >= 2 && typeof values[0] === 'string' && typeof values[1] === 'number') {
+                                    if (values[0] in newCounts) newCounts[values[0]] = values[1];
+                                }
+                            }
+                        });
+                    } else if (data && typeof data === 'object') {
+                        // If backend returns a map of roles to counts
+                        Object.keys(newCounts).forEach(key => {
+                            if (typeof data[key] === 'number') {
+                                newCounts[key] = data[key];
+                            } else if (typeof data[key] === 'string' && !isNaN(Number(data[key]))) {
+                                newCounts[key] = Number(data[key]);
+                            }
+                        });
+                    }
+                    return newCounts;
+                });
             } catch (error) {
                 console.error("Failed to fetch user counts", error);
             } finally {
