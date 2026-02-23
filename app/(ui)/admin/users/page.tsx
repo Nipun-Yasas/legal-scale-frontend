@@ -1,16 +1,15 @@
 "use client";
 
-import React, { useState } from "react";
-import { Search, ChevronDown, X, Ban, UserCog } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Search, ChevronDown, Ban, UserCog } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 import axiosInstance, { API_PATHS } from "@/lib/axios";
-import { Loading } from "@/_components/common/Loading";
 import { toast } from "sonner";
 
 import { Role, Status, User, ROLES, formatRoleName } from "./types";
-import { ChangeRoleModal } from "./components/ChangeRoleModal";
-import { BanModal } from "./components/BanModal";
+import { ChangeRoleModal } from "../_components/ChangeRoleModal";
+import { BanModal } from "../_components/BanModal";
 
 const roleBadgeColor: Record<string, string> = {
     "SYSTEM_ADMIN": "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400",
@@ -34,7 +33,7 @@ export default function UsersPage() {
     const [isRoleChanging, setIsRoleChanging] = useState(false);
     const [isBanning, setIsBanning] = useState(false);
 
-    React.useEffect(() => {
+    useEffect(() => {
         const fetchUsers = async () => {
             try {
                 const { data } = await axiosInstance.get(API_PATHS.ADMIN.GET_USERS);
@@ -44,6 +43,7 @@ export default function UsersPage() {
                     email: u.email,
                     role: u.roleName || "USER",
                     status: u.banned ? "Banned" : "Active",
+                    approverLevel: u.approverLevel || null,
                 }));
                 setUsers(mapped);
             } catch (err) {
@@ -64,7 +64,7 @@ export default function UsersPage() {
         return matchSearch && matchRole && matchStatus;
     });
 
-    const handleRoleChange = async (role: Role) => {
+    const handleRoleChange = async (role: Role, approverLevel: number | null) => {
         if (!changeRoleTarget) return;
 
         setIsRoleChanging(true);
@@ -72,9 +72,10 @@ export default function UsersPage() {
             await axiosInstance.patch(API_PATHS.ADMIN.CHANGE_ROLE, {
                 email: changeRoleTarget.email,
                 newRole: role,
+                approverLevel: approverLevel,
             });
             setUsers((prev) =>
-                prev.map((u) => (u.id === changeRoleTarget.id ? { ...u, role } : u))
+                prev.map((u) => (u.id === changeRoleTarget.id ? { ...u, role, approverLevel } : u))
             );
             toast.success(`Role changed to ${formatRoleName(role)} successfully.`);
         } catch (error) {
@@ -171,108 +172,123 @@ export default function UsersPage() {
             </div>
 
             {/* Table */}
-            {loading ? (
-                <div className="w-full h-40 flex justify-center items-center">
-                    <Loading />
-                </div>
-            ) : (
-                <div className="rounded-2xl bg-backgroundSecondary border border-borderPrimary shadow-sm overflow-x-auto">
-                    <table className="w-full text-sm">
-                        <thead>
-                            <tr className="border-b border-borderPrimary">
-                                <th className="text-left px-5 py-3.5 text-textSecondary font-medium">#</th>
-                                <th className="text-left px-5 py-3.5 text-textSecondary font-medium">Name</th>
-                                <th className="text-left px-5 py-3.5 text-textSecondary font-medium">Email</th>
-                                <th className="text-left px-5 py-3.5 text-textSecondary font-medium">Role</th>
-                                <th className="text-left px-5 py-3.5 text-textSecondary font-medium">Status</th>
-                                <th className="text-left px-5 py-3.5 text-textSecondary font-medium">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {filtered.length === 0 ? (
-                                <tr>
-                                    <td colSpan={7} className="text-center py-12 text-textSecondary">
-                                        No users found
+            <div className="rounded-2xl bg-backgroundSecondary border border-borderPrimary shadow-sm overflow-x-auto">
+                <table className="w-full text-sm">
+                    <thead>
+                        <tr className="border-b border-borderPrimary">
+                            <th className="text-left px-5 py-3.5 text-textSecondary font-medium">#</th>
+                            <th className="text-left px-5 py-3.5 text-textSecondary font-medium">Name</th>
+                            <th className="text-left px-5 py-3.5 text-textSecondary font-medium">Email</th>
+                            <th className="text-left px-5 py-3.5 text-textSecondary font-medium">Role</th>
+                            <th className="text-left px-5 py-3.5 text-textSecondary font-medium">Status</th>
+                            <th className="text-left px-5 py-3.5 text-textSecondary font-medium">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {loading ? (
+                            [...Array(5)].map((_, i) => (
+                                <tr key={i} className="border-b border-borderPrimary animate-pulse">
+                                    <td className="px-5 py-4"><div className="h-4 w-4 bg-hoverPrimary rounded"></div></td>
+                                    <td className="px-5 py-4">
+                                        <div className="flex items-center gap-2">
+                                            <div className="h-8 w-8 rounded-full bg-hoverPrimary"></div>
+                                            <div className="h-4 w-32 bg-hoverPrimary rounded"></div>
+                                        </div>
+                                    </td>
+                                    <td className="px-5 py-4"><div className="h-4 w-48 bg-hoverPrimary rounded"></div></td>
+                                    <td className="px-5 py-4"><div className="h-5 w-24 bg-hoverPrimary rounded-full"></div></td>
+                                    <td className="px-5 py-4"><div className="h-5 w-16 bg-hoverPrimary rounded-full"></div></td>
+                                    <td className="px-5 py-4">
+                                        <div className="flex gap-2">
+                                            <div className="h-7 w-16 bg-hoverPrimary rounded-lg"></div>
+                                            <div className="h-7 w-16 bg-hoverPrimary rounded-lg"></div>
+                                        </div>
                                     </td>
                                 </tr>
-                            ) : (
-                                filtered.map((user, idx) => (
-                                    <tr
-                                        key={user.id}
-                                        className="border-b border-borderPrimary last:border-0 hover:bg-hoverPrimary transition-colors"
-                                    >
-                                        <td className="px-5 py-4 text-textSecondary">{idx + 1}</td>
-                                        <td className="px-5 py-4">
-                                            <div className="flex items-center gap-2">
-                                                <div className="h-8 w-8 rounded-full bg-blue-500/20 flex items-center justify-center shrink-0">
-                                                    <span className="text-xs font-semibold text-blue-500">
-                                                        {user.name.charAt(0)}
-                                                    </span>
-                                                </div>
-                                                <span className="font-medium text-textPrimary">{user.name}</span>
+                            ))
+                        ) : filtered.length === 0 ? (
+                            <tr>
+                                <td colSpan={6} className="text-center py-12 text-textSecondary">
+                                    No users found
+                                </td>
+                            </tr>
+                        ) : (
+                            filtered.map((user, idx) => (
+                                <tr
+                                    key={user.id}
+                                    className="border-b border-borderPrimary last:border-0 hover:bg-hoverPrimary transition-colors"
+                                >
+                                    <td className="px-5 py-4 text-textSecondary">{idx + 1}</td>
+                                    <td className="px-5 py-4">
+                                        <div className="flex items-center gap-2">
+                                            <div className="h-8 w-8 rounded-full bg-blue-500/20 flex items-center justify-center shrink-0">
+                                                <span className="text-xs font-semibold text-blue-500">
+                                                    {user.name.charAt(0)}
+                                                </span>
                                             </div>
-                                        </td>
-                                        <td className="px-5 py-4 text-textSecondary">{user.email}</td>
-                                        <td className="px-5 py-4">
+                                            <span className="font-medium text-textPrimary">{user.name}</span>
+                                        </div>
+                                    </td>
+                                    <td className="px-5 py-4 text-textSecondary">{user.email}</td>
+                                    <td className="px-5 py-4">
+                                        <span
+                                            className={cn(
+                                                "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium",
+                                                roleBadgeColor[user.role]
+                                            )}
+                                        >
+                                            {formatRoleName(user.role)}
+                                        </span>
+                                    </td>
+                                    <td className="px-5 py-4">
+                                        <span
+                                            className={cn(
+                                                "inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium",
+                                                user.status === "Active"
+                                                    ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                                                    : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+                                            )}
+                                        >
                                             <span
                                                 className={cn(
-                                                    "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium",
-                                                    roleBadgeColor[user.role]
+                                                    "h-1.5 w-1.5 rounded-full",
+                                                    user.status === "Active" ? "bg-green-500" : "bg-red-500"
                                                 )}
+                                            />
+                                            {user.status}
+                                        </span>
+                                    </td>
+                                    <td className="px-5 py-4">
+                                        <div className="flex items-center gap-2">
+                                            <button
+                                                onClick={() => setChangeRoleTarget(user)}
+                                                title="Change Role"
+                                                className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-blue-50 text-blue-600 hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:hover:bg-blue-900/40 transition-colors"
                                             >
-                                                {formatRoleName(user.role)}
-                                            </span>
-                                        </td>
-                                        <td className="px-5 py-4">
-                                            <span
+                                                <UserCog className="h-3.5 w-3.5" />
+                                                Role
+                                            </button>
+                                            <button
+                                                onClick={() => setBanTarget(user)}
+                                                title={user.status === "Banned" ? "Unban" : "Ban"}
                                                 className={cn(
-                                                    "inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium",
-                                                    user.status === "Active"
-                                                        ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
-                                                        : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+                                                    "flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors",
+                                                    user.status === "Banned"
+                                                        ? "bg-green-50 text-green-600 hover:bg-green-100 dark:bg-green-900/20 dark:text-green-400 dark:hover:bg-green-900/40"
+                                                        : "bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/40"
                                                 )}
                                             >
-                                                <span
-                                                    className={cn(
-                                                        "h-1.5 w-1.5 rounded-full",
-                                                        user.status === "Active" ? "bg-green-500" : "bg-red-500"
-                                                    )}
-                                                />
-                                                {user.status}
-                                            </span>
-                                        </td>
-                                        <td className="px-5 py-4">
-                                            <div className="flex items-center gap-2">
-                                                <button
-                                                    onClick={() => setChangeRoleTarget(user)}
-                                                    title="Change Role"
-                                                    className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-blue-50 text-blue-600 hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:hover:bg-blue-900/40 transition-colors"
-                                                >
-                                                    <UserCog className="h-3.5 w-3.5" />
-                                                    Role
-                                                </button>
-                                                <button
-                                                    onClick={() => setBanTarget(user)}
-                                                    title={user.status === "Banned" ? "Unban" : "Ban"}
-                                                    className={cn(
-                                                        "flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors",
-                                                        user.status === "Banned"
-                                                            ? "bg-green-50 text-green-600 hover:bg-green-100 dark:bg-green-900/20 dark:text-green-400 dark:hover:bg-green-900/40"
-                                                            : "bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/40"
-                                                    )}
-                                                >
-                                                    <Ban className="h-3.5 w-3.5" />
-                                                    {user.status === "Banned" ? "Unban" : "Ban"}
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))
-                            )}
-                        </tbody>
-                    </table>
-                </div>
-            )}
+                                                <Ban className="h-3.5 w-3.5" />
+                                                {user.status === "Banned" ? "Unban" : "Ban"}
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))
+                        )}
+                    </tbody>
+                </table>
+            </div>
 
             {/* Modals */}
             {changeRoleTarget && (

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Briefcase,
   Clock,
@@ -13,6 +13,7 @@ import {
   FileX2,
   Users,
 } from "lucide-react";
+import axiosInstance, { API_PATHS } from "@/lib/axios";
 
 /** Simple classnames helper to replace missing '@/lib/utils' */
 const cn = (...classes: Array<string | false | null | undefined>) =>
@@ -30,16 +31,6 @@ const casesByType = [
   { type: "Litigation", count: 7, color: "bg-red-500", light: "bg-red-50 dark:bg-red-900/20", text: "text-red-600 dark:text-red-400" },
 ];
 
-const casesByStatus = [
-  { status: "Open", count: 34, color: "bg-blue-500" },
-  { status: "In Review", count: 18, color: "bg-yellow-500" },
-  { status: "Pending Approval", count: 9, color: "bg-orange-500" },
-  { status: "Closed", count: 52, color: "bg-green-500" },
-  { status: "Escalated", count: 5, color: "bg-red-500" },
-];
-
-const totalCaseStatus = casesByStatus.reduce((s, c) => s + c.count, 0);
-
 /* Case aging buckets */
 const agingData = [
   { label: "0–7 days", count: 12, color: "bg-green-500" },
@@ -50,25 +41,7 @@ const agingData = [
 
 const totalAging = agingData.reduce((s, a) => s + a.count, 0);
 
-/* Workload per officer */
-const workloadData = [
-  { name: "Alice F.", cases: 14 },
-  { name: "Bob P.", cases: 9 },
-  { name: "Carol S.", cases: 11 },
-  { name: "David J.", cases: 6 },
-  { name: "Eve W.", cases: 16 },
-  { name: "Frank R.", cases: 8 },
-];
-
-const maxWorkload = Math.max(...workloadData.map((w) => w.cases));
-
-/* Agreement approval summary */
-const agreementSummary = [
-  { label: "Pending Review", count: 14, icon: FileClock, color: "text-yellow-500", bg: "bg-yellow-50 dark:bg-yellow-900/20" },
-  { label: "Approved", count: 47, icon: FileCheck2, color: "text-green-500", bg: "bg-green-50 dark:bg-green-900/20" },
-  { label: "Rejected", count: 6, icon: FileX2, color: "text-red-500", bg: "bg-red-50 dark:bg-red-900/20" },
-  { label: "Awaiting Signatories", count: 9, icon: Users, color: "text-blue-500", bg: "bg-blue-50 dark:bg-blue-900/20" },
-];
+// Workload per officer is now fetched dynamically
 
 /* Financial exposure — monthly data for bar + line chart */
 const financialMonths = ["Aug", "Sep", "Oct", "Nov", "Dec", "Jan", "Feb"];
@@ -313,6 +286,89 @@ const FinancialChart = ({
 export default function ManagementDashboard() {
   const [chartTab, setChartTab] = useState<"bar" | "line">("bar");
 
+  const [caseCounts, setCaseCounts] = useState({ NEW: 0, ACTIVE: 0, ON_HOLD: 0, CLOSED: 0 });
+  const [agreementCounts, setAgreementCounts] = useState({
+    DRAFT: 0,
+    REVIEW_REQUESTED: 0,
+    PENDING_APPROVAL: 0,
+    APPROVED: 0,
+    REJECTED: 0,
+    EXECUTED: 0,
+    EXPIRED: 0,
+    ARCHIVED: 0
+  });
+  const [workloadData, setWorkloadData] = useState<{ name: string; cases: number }[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const maxWorkload = workloadData.length > 0 ? Math.max(...workloadData.map((w) => w.cases)) : 1;
+
+  useEffect(() => {
+    const fetchCounts = async () => {
+      setIsLoading(true);
+      try {
+        const [caseRes, agreementRes, assigneesRes] = await Promise.all([
+          axiosInstance.get(API_PATHS.MANAGEMENT.GET_CASE_COUNT),
+          axiosInstance.get(API_PATHS.MANAGEMENT.GET_AGREEMENT_COUNT),
+          axiosInstance.get(API_PATHS.MANAGEMENT.GET_ASSINED_CASES_COUNT)
+        ]);
+
+        if (caseRes.data) {
+          setCaseCounts({
+            NEW: caseRes.data.NEW || 0,
+            ACTIVE: caseRes.data.ACTIVE || 0,
+            ON_HOLD: caseRes.data.ON_HOLD || 0,
+            CLOSED: caseRes.data.CLOSED || 0
+          });
+        }
+
+        if (agreementRes.data) {
+          setAgreementCounts({
+            DRAFT: agreementRes.data.DRAFT || 0,
+            REVIEW_REQUESTED: agreementRes.data.REVIEW_REQUESTED || 0,
+            PENDING_APPROVAL: agreementRes.data.PENDING_APPROVAL || 0,
+            APPROVED: agreementRes.data.APPROVED || 0,
+            REJECTED: agreementRes.data.REJECTED || 0,
+            EXECUTED: agreementRes.data.EXECUTED || 0,
+            EXPIRED: agreementRes.data.EXPIRED || 0,
+            ARCHIVED: agreementRes.data.ARCHIVED || 0
+          });
+        }
+
+        if (assigneesRes.data) {
+          const workloadArray = Object.entries(assigneesRes.data).map(([name, cases]) => ({
+            name,
+            cases: Number(cases)
+          }));
+          setWorkloadData(workloadArray);
+        }
+      } catch (error) {
+        console.error("Error fetching dashboard counts:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchCounts();
+  }, []);
+
+  const casesByStatus = [
+    { status: "New", count: caseCounts.NEW, color: "bg-blue-500" },
+    { status: "Active", count: caseCounts.ACTIVE, color: "bg-yellow-500" },
+    { status: "On Hold", count: caseCounts.ON_HOLD, color: "bg-orange-500" },
+    { status: "Closed", count: caseCounts.CLOSED, color: "bg-green-500" },
+  ];
+
+  const totalCaseStatus = casesByStatus.reduce((s, c) => s + c.count, 0) || 1;
+
+  const agreementSummary = [
+    { label: "Draft", count: agreementCounts.DRAFT, icon: FileClock, color: "text-gray-500", bg: "bg-gray-50 dark:bg-gray-900/20" },
+    { label: "Review Requested", count: agreementCounts.REVIEW_REQUESTED, icon: Users, color: "text-blue-500", bg: "bg-blue-50 dark:bg-blue-900/20" },
+    { label: "Pending Approval", count: agreementCounts.PENDING_APPROVAL, icon: Clock, color: "text-yellow-500", bg: "bg-yellow-50 dark:bg-yellow-900/20" },
+    { label: "Approved", count: agreementCounts.APPROVED, icon: CheckCircle2, color: "text-green-500", bg: "bg-green-50 dark:bg-green-900/20" },
+    { label: "Rejected", count: agreementCounts.REJECTED, icon: FileX2, color: "text-red-500", bg: "bg-red-50 dark:bg-red-900/20" },
+    { label: "Executed", count: agreementCounts.EXECUTED, icon: FileCheck2, color: "text-purple-500", bg: "bg-purple-50 dark:bg-purple-900/20" },
+    { label: "Expired", count: agreementCounts.EXPIRED, icon: AlertCircle, color: "text-orange-500", bg: "bg-orange-50 dark:bg-orange-900/20" },
+    { label: "Archived", count: agreementCounts.ARCHIVED, icon: Briefcase, color: "text-slate-500", bg: "bg-slate-50 dark:bg-slate-900/20" },
+  ];
+
   return (
     <div className="flex flex-col gap-8">
       {/* ── Header ── */}
@@ -330,7 +386,7 @@ export default function ManagementDashboard() {
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         <StatCard
           title="Total Active Cases"
-          value={60}
+          value={caseCounts.ACTIVE + caseCounts.NEW}
           sub="Across all departments"
           icon={<Briefcase className="h-4 w-4 text-white" />}
           iconBg="bg-blue-500"
@@ -339,7 +395,7 @@ export default function ManagementDashboard() {
         />
         <StatCard
           title="Pending Agreements"
-          value={14}
+          value={agreementCounts.PENDING_APPROVAL}
           sub="Awaiting review or approval"
           icon={<FileClock className="h-4 w-4 text-white" />}
           iconBg="bg-yellow-500"
@@ -355,7 +411,7 @@ export default function ManagementDashboard() {
         />
         <StatCard
           title="Closed This Month"
-          value={21}
+          value={caseCounts.CLOSED}
           sub="Successfully resolved"
           icon={<CheckCircle2 className="h-4 w-4 text-white" />}
           iconBg="bg-green-500"
@@ -487,40 +543,55 @@ export default function ManagementDashboard() {
             Open cases assigned per legal officer
           </p>
           <div className="flex flex-col gap-3">
-            {workloadData
-              .sort((a, b) => b.cases - a.cases)
-              .map((w) => {
-                const pct = (w.cases / maxWorkload) * 100;
-                const heat =
-                  w.cases >= 14
-                    ? "bg-red-500"
-                    : w.cases >= 10
-                    ? "bg-orange-500"
-                    : w.cases >= 7
-                    ? "bg-yellow-500"
-                    : "bg-green-500";
-                return (
-                  <div key={w.name} className="flex items-center gap-3">
-                    <div className="h-7 w-7 rounded-full bg-blue-500/15 flex items-center justify-center shrink-0">
-                      <span className="text-[10px] font-bold text-blue-500">
-                        {w.name.charAt(0)}
+            {isLoading ? (
+              <div className="flex flex-col gap-4 py-2">
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <div key={i} className="flex items-center gap-3 animate-pulse">
+                    <div className="h-7 w-7 rounded-full bg-borderPrimary shrink-0" />
+                    <div className="h-4 w-16 bg-borderPrimary rounded shrink-0" />
+                    <div className="flex-1 bg-borderPrimary rounded-full h-2" />
+                    <div className="h-4 w-6 bg-borderPrimary rounded shrink-0" />
+                  </div>
+                ))}
+              </div>
+            ) : workloadData.length > 0 ? (
+              workloadData
+                .sort((a, b) => b.cases - a.cases)
+                .map((w) => {
+                  const pct = (w.cases / maxWorkload) * 100;
+                  const heat =
+                    w.cases >= 14
+                      ? "bg-red-500"
+                      : w.cases >= 10
+                        ? "bg-orange-500"
+                        : w.cases >= 7
+                          ? "bg-yellow-500"
+                          : "bg-green-500";
+                  return (
+                    <div key={w.name} className="flex items-center gap-3">
+                      <div className="h-7 w-7 rounded-full bg-blue-500/15 flex items-center justify-center shrink-0">
+                        <span className="text-[10px] font-bold text-blue-500">
+                          {w.name.charAt(0)}
+                        </span>
+                      </div>
+                      <span className="text-sm text-textSecondary w-16 shrink-0 truncate">
+                        {w.name}
+                      </span>
+                      <div className="flex-1 bg-borderPrimary rounded-full h-2 overflow-hidden">
+                        <div
+                          className={cn("h-2 rounded-full", heat)}
+                          style={{ width: `${pct}%` }}
+                        />
+                      </div>
+                      <span className="text-sm font-semibold text-textPrimary w-6 text-right shrink-0">
+                        {w.cases}
                       </span>
                     </div>
-                    <span className="text-sm text-textSecondary w-16 shrink-0">
-                      {w.name}
-                    </span>
-                    <div className="flex-1 bg-borderPrimary rounded-full h-2 overflow-hidden">
-                      <div
-                        className={cn("h-2 rounded-full", heat)}
-                        style={{ width: `${pct}%` }}
-                      />
-                    </div>
-                    <span className="text-sm font-semibold text-textPrimary w-6 text-right shrink-0">
-                      {w.cases}
-                    </span>
-                  </div>
-                );
-              })}
+                  );
+                })
+            ) : (
+              <p className="text-sm text-textSecondary text-center py-4">No officers assigned yet.</p>
+            )}
           </div>
         </div>
       </div>
@@ -546,61 +617,6 @@ export default function ManagementDashboard() {
               <span className="text-3xl font-bold text-textPrimary">{count}</span>
             </div>
           ))}
-        </div>
-
-        {/* Approval pipeline visual */}
-        <div className="mt-6">
-          <p className="text-xs text-textSecondary mb-3 font-medium">
-            Approval pipeline
-          </p>
-          <div className="flex items-center gap-1 flex-wrap">
-            {agreementSummary.map(({ label, count, color }, idx) => {
-              const total = agreementSummary.reduce((s, a) => s + a.count, 0);
-              const pct = (count / total) * 100;
-              const colorMap: Record<string, string> = {
-                "text-yellow-500": "bg-yellow-500",
-                "text-green-500": "bg-green-500",
-                "text-red-500": "bg-red-500",
-                "text-blue-500": "bg-blue-500",
-              };
-              return (
-                <React.Fragment key={label}>
-                  <div
-                    className={cn(
-                      "h-2 rounded-full",
-                      colorMap[color] ?? "bg-slate-400"
-                    )}
-                    style={{ width: `${pct}%`, minWidth: "24px" }}
-                    title={`${label}: ${count}`}
-                  />
-                  {idx < agreementSummary.length - 1 && (
-                    <div className="h-2 w-0.5 bg-background shrink-0" />
-                  )}
-                </React.Fragment>
-              );
-            })}
-          </div>
-          <div className="flex flex-wrap gap-4 mt-3">
-            {agreementSummary.map(({ label, color }) => {
-              const colorMap: Record<string, string> = {
-                "text-yellow-500": "bg-yellow-500",
-                "text-green-500": "bg-green-500",
-                "text-red-500": "bg-red-500",
-                "text-blue-500": "bg-blue-500",
-              };
-              return (
-                <div key={label} className="flex items-center gap-1.5">
-                  <span
-                    className={cn(
-                      "h-2 w-2 rounded-full shrink-0",
-                      colorMap[color] ?? "bg-slate-400"
-                    )}
-                  />
-                  <span className="text-xs text-textSecondary">{label}</span>
-                </div>
-              );
-            })}
-          </div>
         </div>
       </div>
 

@@ -55,7 +55,7 @@ const QuickCard = ({
 
 export default function UserDashboard() {
   return (
-    <div className="flex flex-col gap-8 max-w-7xl mx-auto">
+    <div className="flex flex-col gap-8 mx-auto">
       {/* Header */}
       <div>
         <p className="text-sm text-textSecondary mt-1">
@@ -80,7 +80,7 @@ export default function UserDashboard() {
       </div>
 
       {/* Quick actions */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4">
         <QuickCard
           href="/user/view-agreements"
           icon={<HandshakeIcon className="h-5 w-5 text-white" />}

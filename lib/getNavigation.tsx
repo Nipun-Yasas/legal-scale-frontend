@@ -10,7 +10,9 @@ import {
     GitBranch,
     Briefcase,
     ActivitySquare,
-    View
+    View,
+    FileText,
+    BarChart3
 } from "lucide-react";
 
 export const getNavigation = (role?: string) => {
@@ -99,18 +101,13 @@ export const getNavigation = (role?: string) => {
             return [
                 {
                     label: "Dashboard",
-                    href: `/${role.toLowerCase().replace('_', '-')}/dashboard`,
+                    href: "/manager",
                     icon: <LayoutDashboard className="h-5 w-5 shrink-0 text-textSecondary" />,
                 },
                 {
-                    label: "Cases",
-                    href: `/${role.toLowerCase().replace('_', '-')}/cases`,
-                    icon: <FilePlus2 className="h-5 w-5 shrink-0 text-textSecondary" />,
-                },
-                {
-                    label: "Agreements",
-                    href: `/${role.toLowerCase().replace('_', '-')}/agreements`,
-                    icon: <HandshakeIcon className="h-5 w-5 shrink-0 text-textSecondary" />,
+                    label: "Reports",
+                    href: "/manager/reports",
+                    icon: <BarChart3 className="h-5 w-5 shrink-0 text-textSecondary" />,
                 },
             ];
         case "USER":
@@ -119,17 +116,17 @@ export const getNavigation = (role?: string) => {
                     label: "Dashboard",
                     href: "/user",
                     icon: <LayoutDashboard className="h-5 w-5 shrink-0 text-textSecondary" />,
-                  },
-                  {
+                },
+                {
                     label: "Create Agreements",
                     href: "/user/create-agreements",
                     icon: <HandshakeIcon className="h-5 w-5 shrink-0 text-textSecondary" />,
-                  },
-                  {
+                },
+                {
                     label: "View Agreements",
                     href: "/user/viewagreements",
                     icon: <View className="h-5 w-5 shrink-0 text-textSecondary" />,
-                  },
+                },
             ];
         default:
             return [];

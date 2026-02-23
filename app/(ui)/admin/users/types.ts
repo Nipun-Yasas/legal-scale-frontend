@@ -14,6 +14,7 @@ export interface User {
     email: string;
     role: Role;
     status: Status;
+    approverLevel?: number | null;
 }
 
 export const ROLES: Role[] = [

@@ -23,7 +23,7 @@ export const API_PATHS = {
     UNBAN_USER: "admin/unban",
   },
   DOC: {
-    DOWNLOAD_DOC: (Id: string) => `/${Id}/download`,
+    DOWNLOAD_DOC: (Id: string) => `documents/${Id}/download`,
   },
   CASE: {
     ATTACHMENT_DOCUMENT: (Id: string) => `cases/${Id}/attachments`,
@@ -50,6 +50,11 @@ export const API_PATHS = {
     //Agreements
     REVIEW_AGREEMENT: (Id: string) => `officer/agreements/${Id}/pending-approval`,
     RESPONSE_REVISION: (Id: string) => `agreements/${Id}/respond-revision`,
+  },
+  MANAGEMENT: {
+    GET_CASE_COUNT: "cases/status-counts",
+    GET_AGREEMENT_COUNT: "agreements/status-counts",
+    GET_ASSINED_CASES_COUNT: "cases/officer-counts"
   },
   AGREEMENT: {
     CREATE: "agreements",

@@ -1,6 +1,6 @@
 import { X, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { User } from "../types";
+import { User } from "../users/types";
 
 export function BanModal({
     user,

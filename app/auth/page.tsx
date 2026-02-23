@@ -3,9 +3,11 @@
 import AuthContainer from './_components/AuthContainer';
 import { useRouter } from 'next/navigation';
 import { loginAction, registerAction } from '../actions/authActions';
+import { useAuth } from '@/context/AuthContext';
 
 export default function AuthPage() {
   const router = useRouter();
+  const { checkUser } = useAuth();
 
   const handleLogin = async (values: any) => {
     const res = await loginAction({
@@ -14,6 +16,8 @@ export default function AuthPage() {
     });
     const role = res.data.role;
     if (res.success) {
+      await checkUser();
+
       if (role === "SYSTEM_ADMIN") {
         router.push('/admin');
       } else if (role === "USER") {
@@ -23,7 +27,7 @@ export default function AuthPage() {
       } else if (role === "LEGAL_SUPERVISOR") {
         router.push('/supervisor');
       } else if (role === "MANAGEMENT") {
-        router.push('/management/dashboard');
+        router.push('/manager');
       } else {
         router.push('/dashboard');
       }
@@ -44,6 +48,7 @@ export default function AuthPage() {
     });
 
     if (res.success) {
+      await checkUser();
       router.push('/dashboard');
       return res.data;
     } else {
